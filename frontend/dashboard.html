@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodeQuest — Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body class="dashboard-page">
+
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- XP Popup -->
+  <div class="xp-popup" id="xpPopup">+<span id="xpAmount">50</span> XP ⚡</div>
+
+  <!-- Coin Popup -->
+  <div class="coin-popup" id="coinPopup">+<span id="coinAmount">10</span> 🪙</div>
+
+  <!-- Achievement Popup -->
+  <div class="achievement-popup" id="achievementPopup">
+    <span class="ach-icon" id="achIcon">🏆</span>
+    <div>
+      <div class="ach-title">Achievement Unlocked!</div>
+      <div class="ach-name" id="achName">First Steps</div>
+    </div>
+  </div>
+
+  <!-- Mission Complete Screen -->
+  <div class="mission-complete-overlay" id="missionOverlay">
+    <div class="mission-complete-card">
+      <div class="confetti-container" id="confettiContainer"></div>
+      <div class="mc-emoji">🎉</div>
+      <h2>Mission Complete!</h2>
+      <div class="mc-stats">
+        <div class="mc-stat"><span class="mc-val" id="mcScore">95</span><span class="mc-label">Score</span></div>
+        <div class="mc-stat"><span class="mc-val" id="mcTime">2:34</span><span class="mc-label">Time</span></div>
+        <div class="mc-stat"><span class="mc-val" id="mcXP">+250</span><span class="mc-label">XP</span></div>
+        <div class="mc-stat"><span class="mc-val" id="mcCoins">+50 🪙</span><span class="mc-label">Coins</span></div>
+      </div>
+      <button class="btn-primary glow-btn" onclick="closeMissionComplete()">Continue Quest ⚔</button>
+    </div>
+  </div>
+
+  <!-- Lesson Modal -->
+  <div class="modal-overlay" id="lessonModal">
+    <div class="lesson-modal-card">
+      <button class="modal-close" onclick="closeLesson()">✕</button>
+      <div class="lesson-modal-header">
+        <span class="lesson-modal-icon" id="modalIcon">🐍</span>
+        <div>
+          <h3 id="modalTitle">Python Variables</h3>
+          <p id="modalSubtitle">Lesson 1 of 5</p>
+        </div>
+      </div>
+      <div class="lesson-content" id="lessonContent">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="lesson-quiz" id="lessonQuiz">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="lesson-actions">
+        <button class="btn-ghost" onclick="closeLesson()">Skip</button>
+        <button class="btn-primary glow-btn" id="lessonNextBtn" onclick="completeLesson()">Complete & Earn XP ⚡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP LAYOUT -->
+  <div class="app-layout">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">⚔</span>
+        <span class="logo-text">CodeQuest</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-page="home" onclick="setPage('home', this)">
+          <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+        </a>
+        <a href="#" class="nav-item" data-page="quests" onclick="setPage('quests', this)">
+          <span class="nav-icon">📜</span><span class="nav-label">Quests</span>
+          <span class="nav-badge">3</span>
+        </a>
+        <a href="#" class="nav-item" data-page="rewards" onclick="setPage('rewards', this)">
+          <span class="nav-icon">🎁</span><span class="nav-label">Rewards</span>
+        </a>
+        <a href="#" class="nav-item" data-page="leaderboard" onclick="setPage('leaderboard', this)">
+          <span class="nav-icon">🏆</span><span class="nav-label">Leaderboard</span>
+        </a>
+        <a href="#" class="nav-item" data-page="compete" onclick="setPage('compete', this)">
+          <span class="nav-icon">⚔</span><span class="nav-label">Compete</span>
+          <span class="nav-badge live">LIVE</span>
+        </a>
+        <a href="#" class="nav-item" data-page="avatar" onclick="setPage('avatar', this)">
+          <span class="nav-icon">🎭</span><span class="nav-label">Avatar</span>
+          <span class="nav-badge" style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#000">NEW</span>
+        </a>
+        <a href="#" class="nav-item" data-page="profile" onclick="setPage('profile', this)">
+          <span class="nav-icon">🧙</span><span class="nav-label">Profile</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar User Card -->
+      <div class="sidebar-user">
+        <div class="user-avatar-sm" id="sidebarAvatarWrap">
+          <canvas id="sidebarAvatarCanvas" width="38" height="38" style="border-radius:50%;display:none"></canvas>
+          <span id="avatarInitialSidebar" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%">A</span>
+          <div class="avatar-level-badge" id="sidebarLevel">5</div>
+        </div>
+        <div class="user-info-sm">
+          <div class="user-name-sm" id="sidebarUsername">Alex Hero</div>
+          <div class="user-xp-sm">
+            <div class="mini-xp-bar"><div class="mini-xp-fill" id="sidebarXPBar" style="width:60%"></div></div>
+            <span id="sidebarXPText">600/1000 XP</span>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()" title="Logout">⏻</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- TOP HEADER BAR -->
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <button class="hamburger" onclick="toggleSidebar()">☰</button>
+          <div class="page-title" id="pageTitle">🏠 Home</div>
+        </div>
+        <div class="top-bar-right">
+          <div class="stat-chip streak">🔥 <span id="streakCount">7</span> Streak</div>
+          <div class="stat-chip xp">⚡ <span id="xpDisplay">600</span> XP</div>
+          <div class="stat-chip coins">🪙 <span id="coinsDisplay">1240</span></div>
+          <div class="notif-btn" onclick="toggleNotif()">🔔 <span class="notif-dot"></span></div>
+        </div>
+      </header>
+
+      <!-- PAGE SECTIONS -->
+
+      <!-- ===== HOME PAGE ===== -->
+      <section class="page active" id="page-home">
+
+        <div class="welcome-banner">
+          <div class="wb-text">
+            <h2>Welcome back, <span id="welcomeName">Alex</span>! 👋</h2>
+            <p>You're on a <strong id="wbStreak">7-day</strong> streak. Keep going, Hero!</p>
+          </div>
+          <div class="wb-illustration">🧙‍♂️</div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-card glass-card">
+            <div class="sc-icon">⚡</div>
+            <div class="sc-val" id="totalXP">1,240</div>
+            <div class="sc-label">Total XP</div>
+            <div class="sc-trend up">↑ +150 today</div>
+          </div>
+          <div class="stat-card glass-card">
+            <div class="sc-icon">🪙</div>
+            <div class="sc-val" id="totalCoins">320</div>
+            <div class="sc-label">Code Coins</div>
+            <div class="sc-trend up">↑ +20 today</div>
+          </div>
+          <div class="stat-card glass-card">
+            <div class="sc-icon">📚</div>
+            <div class="sc-val">12</div>
+            <div class="sc-label">Lessons Done</div>
+            <div class="sc-trend">🐍 Python path</div>
+          </div>
+          <div class="stat-card glass-card">
+            <div class="sc-icon">🏆</div>
+            <div class="sc-val">Rank #<span id="userRank">42</span></div>
+            <div class="sc-label">Leaderboard</div>
+            <div class="sc-trend up">↑ 5 places</div>
+          </div>
+        </div>
+
+        <!-- Learning Path Section -->
+        <div class="section-header">
+          <h3>📚 Learning Paths</h3>
+          <div class="lang-selector">
+            <button class="lang-tab active" onclick="selectLang('python', this)">🐍 Python</button>
+            <button class="lang-tab" onclick="selectLang('javascript', this)">⚡ JS</button>
+            <button class="lang-tab" onclick="selectLang('java', this)">☕ Java</button>
+            <button class="lang-tab" onclick="selectLang('cpp', this)">⚙ C++</button>
+            <button class="lang-tab" onclick="selectLang('webdev', this)">🌐 Web</button>
+            <button class="lang-tab" onclick="selectLang('dsa', this)">🔮 DSA</button>
+          </div>
+        </div>
+
+        <!-- Duolingo-style vertical path -->
+        <div class="learning-path" id="learningPath">
+          <!-- Injected by JS -->
+        </div>
+
+      </section>
+
+      <!-- ===== QUESTS PAGE ===== -->
+      <section class="page" id="page-quests">
+        <div class="page-hero">
+          <h2>📜 Quest Board</h2>
+          <p>Complete quests to earn XP and Code Coins</p>
+        </div>
+
+        <div class="quests-grid">
+          <div class="quest-section">
+            <div class="quest-section-header daily">
+              <span>🌅 Daily Quests</span>
+              <span class="resets-in">Resets in: <span id="questTimer">08:42:17</span></span>
+            </div>
+            <div id="dailyQuests"></div>
+          </div>
+
+          <div class="quest-section">
+            <div class="quest-section-header weekly">
+              <span>📅 Weekly Quests</span>
+              <span class="quest-progress-label">3/5 completed</span>
+            </div>
+            <div id="weeklyQuests"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== REWARDS PAGE ===== -->
+      <section class="page" id="page-rewards">
+        <div class="page-hero">
+          <h2>🎁 Rewards Store</h2>
+          <p>Spend your Code Coins on exclusive items</p>
+        </div>
+        <div class="coins-balance glass-card">
+          <span class="cb-icon">🪙</span>
+          <span>Your Balance: <strong id="rewardCoinsBalance">320</strong> Code Coins</span>
+        </div>
+        <div class="rewards-tabs">
+          <button class="rtab active" onclick="filterRewards('all', this)">All</button>
+          <button class="rtab" onclick="filterRewards('badge', this)">Badges</button>
+          <button class="rtab" onclick="filterRewards('theme', this)">Themes</button>
+          <button class="rtab" onclick="filterRewards('avatar', this)">Avatars</button>
+        </div>
+        <div class="rewards-grid" id="rewardsGrid"></div>
+      </section>
+
+      <!-- ===== LEADERBOARD PAGE ===== -->
+      <section class="page" id="page-leaderboard">
+        <div class="page-hero">
+          <h2>🏆 Leaderboard</h2>
+          <p>Top coders this week — where do you stand?</p>
+        </div>
+        <div class="lb-tabs">
+          <button class="lbtab active" onclick="filterLB('global', this)">🌍 Global</button>
+          <button class="lbtab" onclick="filterLB('weekly', this)">📅 Weekly</button>
+          <button class="lbtab" onclick="filterLB('friends', this)">👥 Friends</button>
+        </div>
+        <div class="podium-row" id="podiumRow"></div>
+        <div class="leaderboard-list" id="lbList"></div>
+      </section>
+
+      <!-- ===== COMPETE PAGE ===== -->
+      <section class="page" id="page-compete">
+        <div class="page-hero">
+          <h2>⚔ Coding Arena</h2>
+          <p>Challenge others and prove your coding supremacy</p>
+        </div>
+        <div class="compete-grid">
+          <div class="compete-card glass-card" onclick="startBattle('speed')">
+            <div class="cc-icon">⚡</div>
+            <h3>Speed Challenge</h3>
+            <p>Who solves it first? Race against another coder in real-time.</p>
+            <div class="cc-meta"><span>🟢 24 online</span><span>⏱ ~5 min</span></div>
+            <button class="btn-primary glow-btn">Find Match</button>
+          </div>
+          <div class="compete-card glass-card" onclick="startBattle('quiz')">
+            <div class="cc-icon">🧠</div>
+            <h3>Quiz Battle</h3>
+            <p>10 rapid-fire questions. Fastest and most accurate wins.</p>
+            <div class="cc-meta"><span>🟢 18 online</span><span>⏱ ~3 min</span></div>
+            <button class="btn-primary glow-btn">Start Quiz</button>
+          </div>
+          <div class="compete-card glass-card" onclick="startBattle('debug')">
+            <div class="cc-icon">🐛</div>
+            <h3>Bug Hunt</h3>
+            <p>Find and fix all bugs before your opponent does.</p>
+            <div class="cc-meta"><span>🟢 9 online</span><span>⏱ ~8 min</span></div>
+            <button class="btn-primary glow-btn">Hunt Bugs</button>
+          </div>
+          <div class="compete-card glass-card" onclick="startBattle('algo')">
+            <div class="cc-icon">🔮</div>
+            <h3>Algorithm Duel</h3>
+            <p>Implement the most efficient solution. Time complexity matters.</p>
+            <div class="cc-meta"><span>🟡 5 online</span><span>⏱ ~15 min</span></div>
+            <button class="btn-primary glow-btn">Enter Duel</button>
+          </div>
+        </div>
+
+        <!-- Battle Arena Demo -->
+        <div class="battle-arena glass-card" id="battleArena" style="display:none">
+          <div class="arena-header">
+            <div class="arena-player you"><span class="ap-avatar">🧙</span><span>You</span></div>
+            <div class="arena-vs">VS</div>
+            <div class="arena-player opp"><span class="ap-avatar">🤖</span><span>Bot Coder</span></div>
+          </div>
+          <div class="arena-problem">
+            <h4>🎯 Problem:</h4>
+            <p id="arenaProblem">Write a function that returns the sum of all even numbers in an array.</p>
+            <div class="code-editor-mini" id="codeEditor" contenteditable="true" spellcheck="false">// Your solution here
+function sumEvens(arr) {
+  
+}</div>
+          </div>
+          <div class="arena-actions">
+            <button class="btn-ghost" onclick="closeBattle()">Forfeit</button>
+            <button class="btn-primary glow-btn" onclick="submitBattle()">Submit Solution ⚡</button>
+          </div>
+          <div class="arena-timer" id="arenaTimer">05:00</div>
+        </div>
+      </section>
+
+      <!-- ===== PROFILE PAGE ===== -->
+      <section class="page" id="page-profile">
+        <div class="profile-hero glass-card">
+          <div class="profile-avatar-big">
+            <span id="profileAvatarEmoji">🧙</span>
+            <div class="pab-level" id="profileLevel">Lv.5</div>
+          </div>
+          <div class="profile-info">
+            <h2 id="profileName">Alex Hero</h2>
+            <p id="profileEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="056469607d45666a616074706076712b6c6a">[email&#160;protected]</a></p>
+            <div class="profile-tags">
+              <span class="ptag">🐍 Python Dev</span>
+              <span class="ptag">⚡ JS Wizard</span>
+              <span class="ptag">🔥 7-Day Streak</span>
+            </div>
+          </div>
+          <button class="btn-ghost edit-profile-btn" onclick="editProfile()">✏ Edit Profile</button>
+        </div>
+
+        <div class="profile-grid">
+          <div class="glass-card">
+            <h4>📊 Stats</h4>
+            <div class="profile-stats">
+              <div class="ps-row"><span>Total XP</span><strong id="psTotalXP">1,240</strong></div>
+              <div class="ps-row"><span>Code Coins</span><strong id="psCoins">320 🪙</strong></div>
+              <div class="ps-row"><span>Lessons</span><strong>12 ✅</strong></div>
+              <div class="ps-row"><span>Missions</span><strong>3 🏅</strong></div>
+              <div class="ps-row"><span>Streak</span><strong id="psStreak">7 🔥</strong></div>
+              <div class="ps-row"><span>Rank</span><strong>#42 🏆</strong></div>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <h4>🏅 Badges</h4>
+            <div class="badges-grid" id="profileBadges"></div>
+          </div>
+
+          <div class="glass-card">
+            <h4>📈 XP Progress</h4>
+            <div class="xp-progress-section">
+              <div class="level-display">Level <span id="pLevel">5</span></div>
+              <div class="xp-bar-big">
+                <div class="xp-bar-fill" id="pXPFill" style="width:60%"></div>
+              </div>
+              <div class="xp-range"><span id="pCurrentXP">600</span> / <span id="pNextXP">1000</span> XP to Level <span id="pNextLevel">6</span></div>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <h4>🔥 Activity Streak</h4>
+            <div class="streak-calendar" id="streakCalendar"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== AVATAR PAGE ===== -->
+      <section class="page" id="page-avatar">
+        <div class="page-hero">
+          <h2>🎭 Avatar Customizer</h2>
+          <p>Design your unique hero — skin, outfit, accessories &amp; more</p>
+        </div>
+
+        <div class="avatar-builder-layout">
+
+          <!-- LEFT: Live Avatar Preview -->
+          <div class="avatar-preview-panel glass-card">
+            <div class="avp-label">YOUR HERO</div>
+            <div class="avatar-stage" id="avatarStage">
+              <!-- Layered SVG avatar rendered by JS -->
+              <canvas id="avatarCanvas" width="220" height="280"></canvas>
+              <div class="avatar-glow-ring"></div>
+            </div>
+            <div class="avp-name" id="avpName">Alex Hero</div>
+            <div class="avp-level">Level <span id="avpLevel">5</span> Coder</div>
+            <button class="btn-primary glow-btn" style="margin-top:16px" onclick="saveAvatar()">
+              Save Avatar ✨
+            </button>
+            <button class="btn-ghost" style="margin-top:8px" onclick="randomizeAvatar()">
+              🎲 Randomize
+            </button>
+          </div>
+
+          <!-- RIGHT: Customization Columns -->
+          <div class="avatar-options-panel">
+
+            <!-- Category Tabs -->
+            <div class="avatar-cat-tabs" id="avatarCatTabs">
+              <button class="acat active" data-cat="skin" onclick="selectAvatarCat('skin',this)">🎨 Skin</button>
+              <button class="acat" data-cat="hair" onclick="selectAvatarCat('hair',this)">💇 Hair</button>
+              <button class="acat" data-cat="outfit" onclick="selectAvatarCat('outfit',this)">👕 Outfit</button>
+              <button class="acat" data-cat="pants" onclick="selectAvatarCat('pants',this)">👖 Pants</button>
+              <button class="acat" data-cat="shoes" onclick="selectAvatarCat('shoes',this)">👟 Shoes</button>
+              <button class="acat" data-cat="accessory" onclick="selectAvatarCat('accessory',this)">🕶 Accessories</button>
+              <button class="acat" data-cat="cape" onclick="selectAvatarCat('cape',this)">🦸 Cape</button>
+              <button class="acat" data-cat="bg" onclick="selectAvatarCat('bg',this)">🌌 Background</button>
+            </div>
+
+            <!-- Options Grid -->
+            <div class="avatar-options-grid" id="avatarOptionsGrid">
+              <!-- Injected by JS -->
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Unlocked Saved Presets -->
+        <div class="avatar-presets-section">
+          <h3>🏆 Hero Presets</h3>
+          <p style="color:var(--text-dim);font-size:13px;margin-bottom:16px">Quick-apply legendary looks</p>
+          <div class="presets-row" id="avatarPresets"></div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- BOTTOM TOOLBAR -->
+    <div class="bottom-toolbar">
+      <button class="bt-btn" onclick="openTool('flashcards')">
+        <span class="bt-icon">🃏</span>
+        <span class="bt-label">Flash Cards</span>
+      </button>
+      <button class="bt-btn" onclick="openTool('revision')">
+        <span class="bt-icon">📖</span>
+        <span class="bt-label">Quick Revision</span>
+      </button>
+      <button class="bt-btn" onclick="openTool('quiz')">
+        <span class="bt-icon">❓</span>
+        <span class="bt-label">Mini Quiz</span>
+      </button>
+      <button class="bt-btn" onclick="openTool('playground')">
+        <span class="bt-icon">💻</span>
+        <span class="bt-label">Playground</span>
+      </button>
+    </div>
+
+  </div><!-- end .app-layout -->
+
+  <!-- Tool Modals -->
+  <div class="modal-overlay" id="toolModal">
+    <div class="tool-modal-card glass-card">
+      <button class="modal-close" onclick="closeTool()">✕</button>
+      <div id="toolModalContent"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="cursor.js"></script>
+  <script src="animations.js"></script>
+  <script src="avatar.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

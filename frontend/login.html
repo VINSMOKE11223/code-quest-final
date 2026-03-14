@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodeQuest — Login</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body class="auth-page">
+
+  <!-- Animated background grid -->
+  <div class="bg-grid"></div>
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+
+  <!-- Custom cursor -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <div class="auth-wrapper">
+    <!-- Left: Branding Panel -->
+    <div class="auth-brand">
+      <div class="brand-logo">
+        <span class="logo-icon">⚔</span>
+        <span class="logo-text">CodeQuest</span>
+      </div>
+      <h1 class="brand-headline">Level up your<br/><span class="gradient-text">coding skills</span></h1>
+      <p class="brand-sub">Complete quests. Earn XP. Conquer algorithms. The RPG coding adventure begins here.</p>
+
+      <div class="brand-stats">
+        <div class="stat-pill"><span class="stat-num">50K+</span><span class="stat-label">Coders</span></div>
+        <div class="stat-pill"><span class="stat-num">200+</span><span class="stat-label">Quests</span></div>
+        <div class="stat-pill"><span class="stat-num">8</span><span class="stat-label">Languages</span></div>
+      </div>
+
+      <div class="floating-badges">
+        <div class="fbadge" style="--d:0s;--x:-20px;--y:-30px">🐍 Python</div>
+        <div class="fbadge" style="--d:0.4s;--x:80px;--y:-60px">☕ Java</div>
+        <div class="fbadge" style="--d:0.8s;--x:160px;--y:-20px">🌐 Web Dev</div>
+        <div class="fbadge" style="--d:1.2s;--x:30px;--y:30px">⚡ C++</div>
+        <div class="fbadge" style="--d:1.6s;--x:130px;--y:40px">🔮 Algo</div>
+      </div>
+    </div>
+
+    <!-- Right: Auth Card -->
+    <div class="auth-card" id="authCard">
+      <div class="card-tabs">
+        <button class="tab-btn active" id="loginTab" onclick="switchTab('login')">Login</button>
+        <button class="tab-btn" id="signupTab" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-header">
+          <h2>Welcome back, Hero</h2>
+          <p>Your quest awaits</p>
+        </div>
+
+        <div class="input-group">
+          <span class="input-icon">✉</span>
+          <input type="email" id="loginEmail" placeholder="Enter your email" required />
+        </div>
+        <div class="input-group">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="loginPassword" placeholder="Enter your password" required />
+          <button type="button" class="eye-btn" onclick="togglePassword('loginPassword')">👁</button>
+        </div>
+
+        <div class="form-meta">
+          <label class="checkbox-label">
+            <input type="checkbox" /> Remember me
+          </label>
+          <a href="#" class="forgot-link" onclick="showForgot()">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn-primary glow-btn">
+          <span class="btn-text">Enter the Quest ⚔</span>
+          <span class="btn-loader hidden">⏳</span>
+        </button>
+
+        <div class="divider"><span>or continue with</span></div>
+
+        <div class="social-btns">
+          <button type="button" class="social-btn" onclick="demoLogin()">
+            <span>🎮</span> Demo Account
+          </button>
+          <button type="button" class="social-btn">
+            <span>🔗</span> Google
+          </button>
+        </div>
+      </form>
+
+      <!-- SIGNUP FORM -->
+      <form class="auth-form" id="signupForm" onsubmit="handleSignup(event)">
+        <div class="form-header">
+          <h2>Create your Hero</h2>
+          <p>Begin your coding adventure</p>
+        </div>
+
+        <div class="input-group">
+          <span class="input-icon">🧙</span>
+          <input type="text" id="signupName" placeholder="Choose your hero name" required />
+        </div>
+        <div class="input-group">
+          <span class="input-icon">✉</span>
+          <input type="email" id="signupEmail" placeholder="Enter your email" required />
+        </div>
+        <div class="input-group">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="signupPassword" placeholder="Create a password" required />
+          <button type="button" class="eye-btn" onclick="togglePassword('signupPassword')">👁</button>
+        </div>
+
+        <div class="password-strength" id="strengthBar">
+          <div class="strength-fill" id="strengthFill"></div>
+          <span id="strengthText">Password strength</span>
+        </div>
+
+        <button type="submit" class="btn-primary glow-btn">
+          <span class="btn-text">Create Hero 🛡</span>
+        </button>
+      </form>
+
+      <!-- FORGOT PASSWORD -->
+      <div class="auth-form" id="forgotForm">
+        <div class="form-header">
+          <h2>Reset Password</h2>
+          <p>We'll send a reset link</p>
+        </div>
+        <div class="input-group">
+          <span class="input-icon">✉</span>
+          <input type="email" placeholder="Enter your email" />
+        </div>
+        <button class="btn-primary glow-btn" onclick="sendReset()">Send Reset Link 📨</button>
+        <button class="btn-ghost" onclick="switchTab('login')">← Back to Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="cursor.js"></script>
+  <script src="animations.js"></script>
+  <script src="script.js"></script>
+
+  <!-- Fallback inline toast in case animations.js fails to load -->
+  <script>
+    if (typeof showToast !== 'function') {
+      window.showToast = function(msg, type) {
+        const c = document.getElementById('toastContainer');
+        if (!c) return;
+        const t = document.createElement('div');
+        t.className = 'toast toast-' + (type || 'info');
+        t.textContent = msg;
+        t.style.cssText = 'padding:12px 20px;border-radius:10px;margin-bottom:8px;font-weight:600;font-size:14px;animation:slideUp .3s ease;' +
+          (type === 'error' ? 'background:#EF4444;color:#fff;' : type === 'success' ? 'background:#10B981;color:#fff;' : 'background:#7C3AED;color:#fff;');
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+      };
+    }
+  </script>
+</body>
+</html>

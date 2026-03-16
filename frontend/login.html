@@ -1,166 +1,647 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CodeQuest — Login</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CODE QUEST — Enter the Arena</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:ital,wght@0,200;0,400;0,700;1,300&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#02040a;
+  --card-bg:rgba(4,10,24,0.82);
+  --border:rgba(0,210,255,0.18);
+  --border-hot:rgba(0,210,255,0.55);
+  --cyan:#00d2ff;
+  --violet:#8b5cf6;
+  --ember:#ff6b2b;
+  --gold:#fbbf24;
+  --green:#00e5a0;
+  --red:#ff4560;
+  --text:#dde8f5;
+  --muted:#4a6080;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);
+  font-family:'Exo 2',sans-serif;
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* ═══ BACKGROUND ═══ */
+#bgCanvas{position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none}
+.nebula{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.nb{position:absolute;border-radius:50%;filter:blur(90px);opacity:0;animation:nbPulse var(--d,14s) ease-in-out infinite var(--delay,0s)}
+.nb1{width:700px;height:500px;top:-10%;left:-15%;background:radial-gradient(circle,rgba(0,150,255,0.22),rgba(100,0,255,0.10) 60%,transparent);--d:14s;--delay:0s}
+.nb2{width:600px;height:600px;top:30%;right:-20%;background:radial-gradient(circle,rgba(139,92,246,0.20),rgba(255,107,43,0.08) 60%,transparent);--d:18s;--delay:-5s}
+.nb3{width:800px;height:400px;bottom:-15%;left:20%;background:radial-gradient(circle,rgba(0,229,160,0.12),rgba(0,150,255,0.12) 60%,transparent);--d:22s;--delay:-9s}
+.nb4{width:400px;height:400px;top:10%;left:40%;background:radial-gradient(circle,rgba(255,107,43,0.10),transparent 70%);--d:16s;--delay:-3s}
+@keyframes nbPulse{0%{opacity:0;transform:scale(.85) translate(0,0)}30%{opacity:1}60%{opacity:.7;transform:scale(1.08) translate(20px,-15px)}100%{opacity:0;transform:scale(.85)}}
+.hex-layer{position:fixed;inset:0;z-index:2;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 2 L54 17 L54 47 L28 62 L2 47 L2 17Z' fill='none' stroke='rgba(0,210,255,0.045)' stroke-width='.7'/%3E%3Cpath d='M28 52 L54 67 L54 97 L28 112 L2 97 L2 67Z' fill='none' stroke='rgba(0,210,255,0.045)' stroke-width='.7'/%3E%3C/svg%3E");background-size:56px 100px;animation:hexDrift 40s linear infinite}
+@keyframes hexDrift{from{background-position:0 0}to{background-position:56px 100px}}
+.scanlines{position:fixed;inset:0;z-index:3;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px)}
+.vignette{position:fixed;inset:0;z-index:4;pointer-events:none;background:radial-gradient(ellipse 80% 80% at 50% 50%,transparent 40%,rgba(2,4,10,0.75) 100%)}
+
+/* ═══ LAYOUT ═══ */
+.arena{position:relative;z-index:10;display:grid;grid-template-columns:1fr 460px 1fr;width:100%;max-width:1380px;min-height:100vh;align-items:center;padding:48px 24px;gap:16px}
+
+/* ═══ SIDE PANELS ═══ */
+.side{display:flex;flex-direction:column;align-items:center;gap:20px;padding:24px 8px}
+.holo{width:100%;max-width:290px;background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:18px 20px;backdrop-filter:blur(20px);position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.holo:hover{border-color:var(--border-hot);box-shadow:0 0 30px rgba(0,210,255,0.12)}
+.holo::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.6}
+.holo::after{content:'';position:absolute;inset:0;border-radius:14px;background:linear-gradient(135deg,rgba(0,210,255,0.04) 0%,transparent 50%) top left/50% 50% no-repeat,linear-gradient(225deg,rgba(139,92,246,0.04) 0%,transparent 50%) top right/50% 50% no-repeat;pointer-events:none}
+.holo-title{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.holo-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border-hot),transparent)}
+.float-a{animation:fA 5s ease-in-out infinite}
+.float-b{animation:fB 6.5s ease-in-out infinite}
+.float-c{animation:fC 7.5s ease-in-out infinite}
+.float-d{animation:fD 4.5s ease-in-out infinite}
+@keyframes fA{0%,100%{transform:translateY(0) rotate(-.4deg)}50%{transform:translateY(-12px) rotate(.4deg)}}
+@keyframes fB{0%,100%{transform:translateY(-6px) rotate(.3deg)}50%{transform:translateY(9px) rotate(-.3deg)}}
+@keyframes fC{0%,100%{transform:translateY(4px) rotate(-.2deg)}50%{transform:translateY(-8px) rotate(.2deg)}}
+@keyframes fD{0%,100%{transform:translateY(-3px) rotate(.5deg)}50%{transform:translateY(6px) rotate(-.5deg)}}
+
+/* XP Ring */
+.xp-ring{width:130px;height:130px;position:relative;margin:0 auto}
+.xp-ring svg{transform:rotate(-90deg)}
+.xp-track{fill:none;stroke:rgba(255,255,255,0.05);stroke-width:6}
+.xp-fill{fill:none;stroke-width:6;stroke-linecap:round;stroke:url(#xg);stroke-dasharray:345;stroke-dashoffset:345;animation:xpFill 2.5s cubic-bezier(.4,0,.2,1) forwards .5s}
+@keyframes xpFill{to{stroke-dashoffset:78}}
+.xp-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.xp-val{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:var(--cyan)}
+.xp-lbl{font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+
+/* Radar */
+.radar-wrap{width:160px;height:160px;position:relative;margin:0 auto}
+.radar-svg{width:100%;height:100%}
+.r-sweep{transform-origin:80px 80px;animation:rSpin 3s linear infinite}
+@keyframes rSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.r-blip{animation:blip 3s ease-in-out infinite}
+.r-blip:nth-child(2){animation-delay:-.8s}
+.r-blip:nth-child(3){animation-delay:-1.6s}
+@keyframes blip{0%,100%{opacity:0}40%,60%{opacity:1}}
+
+/* Stat bars */
+.sbar{margin-bottom:12px}
+.sbar-meta{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;color:var(--muted)}
+.sbar-meta span:last-child{color:var(--text);font-weight:700}
+.sbar-track{height:5px;background:rgba(255,255,255,0.05);border-radius:99px;overflow:hidden;position:relative}
+.sbar-fill{height:100%;border-radius:99px;position:relative}
+.sbar-fill::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:inherit;filter:brightness(2) blur(2px);animation:dotG 2s ease-in-out infinite}
+@keyframes dotG{0%,100%{opacity:.6}50%{opacity:1;transform:translateY(-50%) scale(1.3)}}
+
+/* Badges */
+.badge-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.bdg{padding:5px 9px;border-radius:7px;font-size:10px;font-weight:700;letter-spacing:.5px;border:1px solid;display:flex;align-items:center;gap:5px;transition:transform .2s,box-shadow .2s;cursor:default}
+.bdg:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.b-gold{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:#fbbf24}
+.b-cyan{background:rgba(0,210,255,.08);border-color:rgba(0,210,255,.3);color:var(--cyan)}
+.b-vio{background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.3);color:#a78bfa}
+.b-ember{background:rgba(255,107,43,.08);border-color:rgba(255,107,43,.3);color:var(--ember)}
+.b-green{background:rgba(0,229,160,.08);border-color:rgba(0,229,160,.3);color:var(--green)}
+
+/* Feed */
+.feed-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;color:var(--muted)}
+.feed-row:last-child{border:none}
+.feed-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px currentColor}
+
+/* Terminal */
+.term{font-family:'Courier New',monospace;font-size:11px;line-height:1.75;color:#7a9cbd}
+.ln{color:#2a4060;margin-right:10px;user-select:none}
+.tk{color:#8b5cf6}.tf{color:#00d2ff}.ts{color:#00e5a0}.tn{color:#fbbf24}.tc{color:#2d4a66}.to{color:#ff6b2b}
+.cur{display:inline-block;width:7px;height:12px;background:var(--cyan);vertical-align:text-bottom;animation:blink .9s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ═══ LOGIN CARD ═══ */
+.login-card{background:var(--card-bg);border:1px solid var(--border);border-radius:22px;padding:44px 40px 48px;backdrop-filter:blur(30px);box-shadow:0 0 0 1px rgba(0,210,255,0.12),0 8px 60px rgba(0,210,255,0.06),0 40px 100px rgba(0,0,0,0.6);position:relative;overflow:hidden;animation:cardIn .8s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:none}}
+.login-card::before{content:'';position:absolute;top:0;left:8%;right:8%;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),var(--violet),transparent);border-radius:99px;box-shadow:0 0 20px var(--cyan),0 0 40px var(--violet);animation:barGlow 4s ease-in-out infinite alternate}
+@keyframes barGlow{from{opacity:.6}to{opacity:1;filter:blur(1px)}}
+.login-card::after{content:'';position:absolute;inset:0;border-radius:22px;background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(0,210,255,0.05),transparent 70%);pointer-events:none}
+
+/* Logo */
+.logo{text-align:center;margin-bottom:34px;animation:fuUp .7s ease both .1s}
+@keyframes fuUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.emblem{font-size:44px;display:block;margin:0 auto 12px;animation:eFloat 3s ease-in-out infinite,eGlow 2s ease-in-out infinite alternate}
+@keyframes eFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.05)}}
+@keyframes eGlow{from{filter:drop-shadow(0 0 10px rgba(0,210,255,.7))}to{filter:drop-shadow(0 0 22px rgba(139,92,246,1)) drop-shadow(0 0 40px rgba(0,210,255,.5))}}
+.logo-name{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;letter-spacing:8px;text-transform:uppercase;background:linear-gradient(90deg,var(--cyan) 0%,#fff 45%,var(--violet) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-tag{font-size:10px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-top:6px;font-style:italic}
+
+/* Tabs */
+.tabs{display:flex;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:26px;animation:fuUp .7s ease both .2s}
+.tab-btn{flex:1;background:none;border:none;color:var(--muted);font-family:'Exo 2',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:9px;border-radius:9px;cursor:pointer;transition:all .3s}
+.tab-btn.active{background:linear-gradient(135deg,rgba(0,210,255,.14),rgba(139,92,246,.14));color:var(--cyan);box-shadow:inset 0 0 0 1px rgba(0,210,255,.25),0 0 20px rgba(0,210,255,.08)}
+
+/* Fields */
+.form{display:none}
+.form.active{display:block;animation:fuUp .35s ease both}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.inp-wrap{position:relative}
+.inp-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.45;pointer-events:none;transition:opacity .2s}
+.field input{width:100%;background:rgba(0,0,0,0.35);border:1px solid var(--border);border-radius:11px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:15px;font-weight:600;padding:13px 14px 13px 44px;outline:none;transition:border-color .25s,box-shadow .25s,background .25s}
+.field input::placeholder{color:rgba(74,96,128,.7)}
+.field input:focus{background:rgba(0,210,255,0.03);border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,210,255,.1),inset 0 0 30px rgba(0,210,255,.03)}
+.field input:focus+.inp-icon{opacity:.9}
+.field input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(255,69,96,.1)}
+.field-err{font-size:11px;color:var(--red);margin-top:6px;display:none;letter-spacing:.5px}
+.field-err.show{display:block;animation:fuUp .2s ease both}
+
+/* Submit */
+.btn-submit{width:100%;background:linear-gradient(135deg,rgba(0,210,255,.15),rgba(139,92,246,.15));border:1px solid rgba(0,210,255,.35);border-radius:12px;color:var(--cyan);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:15px;cursor:pointer;position:relative;overflow:hidden;transition:all .3s;margin-top:6px}
+.btn-submit:hover:not(:disabled){background:linear-gradient(135deg,rgba(0,210,255,.25),rgba(139,92,246,.25));border-color:var(--cyan);box-shadow:0 0 40px rgba(0,210,255,.2),0 0 80px rgba(0,210,255,.08);transform:translateY(-2px)}
+.btn-submit:active{transform:translateY(0)}
+.btn-submit:disabled{opacity:.45;cursor:not-allowed}
+.btn-submit::before{content:'';position:absolute;top:-2px;left:-120%;width:80%;height:calc(100% + 4px);background:linear-gradient(105deg,transparent,rgba(255,255,255,.12),transparent);transform:skewX(-20deg);transition:left .6s}
+.btn-submit:hover::before{left:150%}
+.btn-submit::after{content:'';position:absolute;inset:0;border-radius:12px;border:1px solid transparent;animation:bPulse 2.5s ease-in-out infinite}
+@keyframes bPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,210,255,.4)}50%{box-shadow:0 0 0 6px rgba(0,210,255,0)}}
+
+/* Toast */
+#toastZone{position:fixed;bottom:28px;right:28px;display:flex;flex-direction:column;gap:10px;z-index:9999}
+.toast{display:flex;align-items:flex-start;gap:12px;background:rgba(4,10,24,0.95);border:1px solid var(--border);border-radius:14px;padding:16px 20px;min-width:310px;max-width:380px;box-shadow:0 8px 40px rgba(0,0,0,.5);animation:tIn .4s cubic-bezier(.34,1.4,.64,1) forwards;position:relative;overflow:hidden;backdrop-filter:blur(20px)}
+.toast::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.toast.success::before{background:var(--green);box-shadow:0 0 12px var(--green)}
+.toast.error::before{background:var(--red);box-shadow:0 0 12px var(--red)}
+.toast.info::before{background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+.t-ico{font-size:20px;flex-shrink:0;line-height:1.2}
+.t-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:3px}
+.toast.success .t-title{color:var(--green)}.toast.error .t-title{color:var(--red)}.toast.info .t-title{color:var(--cyan)}
+.t-msg{font-size:12px;color:var(--muted);line-height:1.4}
+.t-bar{position:absolute;bottom:0;left:0;height:2px;animation:tBar 3.2s linear forwards}
+.toast.success .t-bar{background:var(--green)}.toast.error .t-bar{background:var(--red)}.toast.info .t-bar{background:var(--cyan)}
+@keyframes tIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes tOut{from{opacity:1;transform:none}to{opacity:0;transform:translateX(24px)}}
+@keyframes tBar{from{width:100%}to{width:0}}
+
+@media(max-width:1150px){.arena{grid-template-columns:1fr}.side{display:none}.login-card{max-width:480px;width:100%;margin:auto}}
+@media(max-width:520px){.login-card{padding:32px 22px 36px}.logo-name{font-size:22px;letter-spacing:5px}}
+</style>
 </head>
-<body class="auth-page">
+<body>
 
-  <!-- Animated background grid -->
-  <div class="bg-grid"></div>
-  <div class="bg-orb orb1"></div>
-  <div class="bg-orb orb2"></div>
-  <div class="bg-orb orb3"></div>
+<canvas id="bgCanvas"></canvas>
+<div class="nebula">
+  <div class="nb nb1"></div><div class="nb nb2"></div>
+  <div class="nb nb3"></div><div class="nb nb4"></div>
+</div>
+<div class="hex-layer"></div>
+<div class="scanlines"></div>
+<div class="vignette"></div>
 
-  <!-- Custom cursor -->
-  <div class="cursor-dot" id="cursorDot"></div>
-  <div class="cursor-ring" id="cursorRing"></div>
+<div class="arena">
 
-  <div class="auth-wrapper">
-    <!-- Left: Branding Panel -->
-    <div class="auth-brand">
-      <div class="brand-logo">
-        <span class="logo-icon">⚔</span>
-        <span class="logo-text">CodeQuest</span>
-      </div>
-      <h1 class="brand-headline">Level up your<br/><span class="gradient-text">coding skills</span></h1>
-      <p class="brand-sub">Complete quests. Earn XP. Conquer algorithms. The RPG coding adventure begins here.</p>
-
-      <div class="brand-stats">
-        <div class="stat-pill"><span class="stat-num">50K+</span><span class="stat-label">Coders</span></div>
-        <div class="stat-pill"><span class="stat-num">200+</span><span class="stat-label">Quests</span></div>
-        <div class="stat-pill"><span class="stat-num">8</span><span class="stat-label">Languages</span></div>
-      </div>
-
-      <div class="floating-badges">
-        <div class="fbadge" style="--d:0s;--x:-20px;--y:-30px">🐍 Python</div>
-        <div class="fbadge" style="--d:0.4s;--x:80px;--y:-60px">☕ Java</div>
-        <div class="fbadge" style="--d:0.8s;--x:160px;--y:-20px">🌐 Web Dev</div>
-        <div class="fbadge" style="--d:1.2s;--x:30px;--y:30px">⚡ C++</div>
-        <div class="fbadge" style="--d:1.6s;--x:130px;--y:40px">🔮 Algo</div>
+  <!-- LEFT -->
+  <div class="side">
+    <div class="holo float-a">
+      <div class="holo-title" style="color:var(--cyan)">⚡ Season XP</div>
+      <div class="xp-ring">
+        <svg viewBox="0 0 130 130" width="130" height="130">
+          <defs>
+            <linearGradient id="xg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00d2ff"/>
+              <stop offset="100%" stop-color="#8b5cf6"/>
+            </linearGradient>
+          </defs>
+          <circle class="xp-track" cx="65" cy="65" r="55"/>
+          <circle class="xp-fill" cx="65" cy="65" r="55"/>
+        </svg>
+        <div class="xp-center"><span class="xp-val">18.2K</span><span class="xp-lbl">Total XP</span></div>
       </div>
     </div>
 
-    <!-- Right: Auth Card -->
-    <div class="auth-card" id="authCard">
-      <div class="card-tabs">
-        <button class="tab-btn active" id="loginTab" onclick="switchTab('login')">Login</button>
-        <button class="tab-btn" id="signupTab" onclick="switchTab('signup')">Sign Up</button>
+    <div class="holo float-b">
+      <div class="holo-title" style="color:var(--green)">🎯 Arena Radar</div>
+      <div class="radar-wrap">
+        <svg class="radar-svg" viewBox="0 0 160 160">
+          <defs>
+            <radialGradient id="rg"><stop offset="0%" stop-color="rgba(0,229,160,0.5)"/><stop offset="100%" stop-color="rgba(0,229,160,0)"/></radialGradient>
+          </defs>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(0,229,160,0.08)" stroke-width="1"/>
+          <circle cx="80" cy="80" r="50" fill="none" stroke="rgba(0,229,160,0.10)" stroke-width="1"/>
+          <circle cx="80" cy="80" r="30" fill="none" stroke="rgba(0,229,160,0.14)" stroke-width="1"/>
+          <circle cx="80" cy="80" r="10" fill="none" stroke="rgba(0,229,160,0.25)" stroke-width="1"/>
+          <line x1="80" y1="10" x2="80" y2="150" stroke="rgba(0,229,160,0.06)" stroke-width="1"/>
+          <line x1="10" y1="80" x2="150" y2="80" stroke="rgba(0,229,160,0.06)" stroke-width="1"/>
+          <g class="r-sweep">
+            <path d="M80,80 L80,10 A70,70 0 0,1 140,80 Z" fill="url(#rg)" opacity="0.5"/>
+            <line x1="80" y1="80" x2="80" y2="10" stroke="rgba(0,229,160,0.7)" stroke-width="1.5"/>
+          </g>
+          <circle class="r-blip" cx="110" cy="55" r="3" fill="#00e5a0"/>
+          <circle class="r-blip" cx="50" cy="100" r="2.5" fill="#00d2ff"/>
+          <circle class="r-blip" cx="95" cy="110" r="2" fill="#fbbf24"/>
+          <circle cx="80" cy="80" r="3" fill="#00e5a0"/>
+        </svg>
       </div>
+      <div style="text-align:center;font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:2px">247 HEROES ONLINE</div>
+    </div>
 
-      <!-- LOGIN FORM -->
-      <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
-        <div class="form-header">
-          <h2>Welcome back, Hero</h2>
-          <p>Your quest awaits</p>
-        </div>
+    <div class="holo float-c">
+      <div class="holo-title" style="color:var(--violet)">⚔️ Hero Stats</div>
+      <div class="sbar"><div class="sbar-meta"><span>Strength</span><span>84</span></div><div class="sbar-track"><div class="sbar-fill" style="width:84%;background:linear-gradient(90deg,#00d2ff,#8b5cf6)"></div></div></div>
+      <div class="sbar"><div class="sbar-meta"><span>Agility</span><span>67</span></div><div class="sbar-track"><div class="sbar-fill" style="width:67%;background:linear-gradient(90deg,#00e5a0,#00d2ff)"></div></div></div>
+      <div class="sbar"><div class="sbar-meta"><span>Wisdom</span><span>92</span></div><div class="sbar-track"><div class="sbar-fill" style="width:92%;background:linear-gradient(90deg,#fbbf24,#ff6b2b)"></div></div></div>
+      <div class="sbar"><div class="sbar-meta"><span>Endurance</span><span>73</span></div><div class="sbar-track"><div class="sbar-fill" style="width:73%;background:linear-gradient(90deg,#8b5cf6,#ff6b2b)"></div></div></div>
+    </div>
+  </div>
 
-        <div class="input-group">
-          <span class="input-icon">✉</span>
-          <input type="email" id="loginEmail" placeholder="Enter your email" required />
+  <!-- LOGIN CARD -->
+  <div class="login-card">
+    <div class="logo">
+      <span class="emblem">⚔️</span>
+      <div class="logo-name">Code Quest</div>
+      <div class="logo-tag">Where Legends Are Compiled</div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn" onclick="switchTab('signup')">Create Hero</button>
+    </div>
+    <div class="form active" id="formLogin">
+      <div class="field">
+        <label>Email Address</label>
+        <div class="inp-wrap">
+          <input type="email" id="loginEmail" placeholder="hero@codequest.io" autocomplete="email"/>
+          <span class="inp-icon">✉️</span>
         </div>
-        <div class="input-group">
-          <span class="input-icon">🔒</span>
-          <input type="password" id="loginPassword" placeholder="Enter your password" required />
-          <button type="button" class="eye-btn" onclick="togglePassword('loginPassword')">👁</button>
+        <div class="field-err" id="loginEmailErr">⚠ Enter a valid email address.</div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="inp-wrap">
+          <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"/>
+          <span class="inp-icon">🔐</span>
         </div>
+        <div class="field-err" id="loginPassErr">⚠ Password is required.</div>
+      </div>
+      <button class="btn-submit" id="btnLogin" onclick="doLogin()">Enter The Arena &nbsp;⚔️</button>
+    </div>
+    <div class="form" id="formSignup">
+      <div class="field">
+        <label>Hero Name</label>
+        <div class="inp-wrap">
+          <input type="text" id="signupName" placeholder="ShadowCoder42" autocomplete="username"/>
+          <span class="inp-icon">🧙</span>
+        </div>
+        <div class="field-err" id="signupNameErr">⚠ Choose your hero name.</div>
+      </div>
+      <div class="field">
+        <label>Email Address</label>
+        <div class="inp-wrap">
+          <input type="email" id="signupEmail" placeholder="hero@codequest.io" autocomplete="email"/>
+          <span class="inp-icon">✉️</span>
+        </div>
+        <div class="field-err" id="signupEmailErr">⚠ Enter a valid email address.</div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="inp-wrap">
+          <input type="password" id="signupPass" placeholder="min. 6 characters" autocomplete="new-password"/>
+          <span class="inp-icon">🔐</span>
+        </div>
+        <div class="field-err" id="signupPassErr">⚠ Password must be at least 6 characters.</div>
+      </div>
+      <button class="btn-submit" id="btnSignup" onclick="doSignup()">Forge Your Legend &nbsp;🛡️</button>
+    </div>
+  </div>
 
-        <div class="form-meta">
-          <label class="checkbox-label">
-            <input type="checkbox" /> Remember me
-          </label>
-          <a href="#" class="forgot-link" onclick="showForgot()">Forgot password?</a>
-        </div>
+  <!-- RIGHT -->
+  <div class="side">
+    <div class="holo float-d">
+      <div class="holo-title" style="color:var(--cyan)">💻 Daily Challenge</div>
+      <div class="term">
+        <div><span class="ln">1</span><span class="tc">// #247 — Two Sum</span></div>
+        <div><span class="ln">2</span><span class="tk">function</span> <span class="tf">twoSum</span>(nums, target) {</div>
+        <div><span class="ln">3</span>&nbsp;&nbsp;<span class="tk">const</span> map <span class="to">=</span> <span class="tk">new</span> <span class="tf">Map</span>();</div>
+        <div><span class="ln">4</span>&nbsp;&nbsp;<span class="tk">for</span> (<span class="tk">let</span> i <span class="to">=</span> <span class="tn">0</span>; i &lt; nums.length; i++) {</div>
+        <div><span class="ln">5</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tk">const</span> diff <span class="to">=</span> target <span class="to">-</span> nums[i];</div>
+        <div><span class="ln">6</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tk">if</span> (map.<span class="tf">has</span>(diff)) <span class="tk">return</span> [map.<span class="tf">get</span>(diff), i];</div>
+        <div><span class="ln">7</span>&nbsp;&nbsp;&nbsp;&nbsp;map.<span class="tf">set</span>(nums[i], i);</div>
+        <div><span class="ln">8</span>&nbsp;&nbsp;}</div>
+        <div><span class="ln">9</span>} <span class="cur"></span></div>
+      </div>
+    </div>
 
-        <button type="submit" class="btn-primary glow-btn">
-          <span class="btn-text">Enter the Quest ⚔</span>
-          <span class="btn-loader hidden">⏳</span>
-        </button>
+    <div class="holo float-b">
+      <div class="holo-title" style="color:var(--gold)">🏆 Achievements</div>
+      <div class="badge-grid">
+        <div class="bdg b-gold">⚡ Speed Coder</div>
+        <div class="bdg b-cyan">🧠 Big Brain</div>
+        <div class="bdg b-vio">🌙 Night Owl</div>
+        <div class="bdg b-ember">🔥 On Fire</div>
+        <div class="bdg b-cyan">💎 Gem Hunter</div>
+        <div class="bdg b-vio">🛡️ Defender</div>
+        <div class="bdg b-green">✅ Bug Slayer</div>
+        <div class="bdg b-gold">👑 Top Ranked</div>
+      </div>
+    </div>
 
-        <div class="divider"><span>or continue with</span></div>
-
-        <div class="social-btns">
-          <button type="button" class="social-btn" onclick="demoLogin()">
-            <span>🎮</span> Demo Account
-          </button>
-          <button type="button" class="social-btn">
-            <span>🔗</span> Google
-          </button>
-        </div>
-      </form>
-
-      <!-- SIGNUP FORM -->
-      <form class="auth-form" id="signupForm" onsubmit="handleSignup(event)">
-        <div class="form-header">
-          <h2>Create your Hero</h2>
-          <p>Begin your coding adventure</p>
-        </div>
-
-        <div class="input-group">
-          <span class="input-icon">🧙</span>
-          <input type="text" id="signupName" placeholder="Choose your hero name" required />
-        </div>
-        <div class="input-group">
-          <span class="input-icon">✉</span>
-          <input type="email" id="signupEmail" placeholder="Enter your email" required />
-        </div>
-        <div class="input-group">
-          <span class="input-icon">🔒</span>
-          <input type="password" id="signupPassword" placeholder="Create a password" required />
-          <button type="button" class="eye-btn" onclick="togglePassword('signupPassword')">👁</button>
-        </div>
-
-        <div class="password-strength" id="strengthBar">
-          <div class="strength-fill" id="strengthFill"></div>
-          <span id="strengthText">Password strength</span>
-        </div>
-
-        <button type="submit" class="btn-primary glow-btn">
-          <span class="btn-text">Create Hero 🛡</span>
-        </button>
-      </form>
-
-      <!-- FORGOT PASSWORD -->
-      <div class="auth-form" id="forgotForm">
-        <div class="form-header">
-          <h2>Reset Password</h2>
-          <p>We'll send a reset link</p>
-        </div>
-        <div class="input-group">
-          <span class="input-icon">✉</span>
-          <input type="email" placeholder="Enter your email" />
-        </div>
-        <button class="btn-primary glow-btn" onclick="sendReset()">Send Reset Link 📨</button>
-        <button class="btn-ghost" onclick="switchTab('login')">← Back to Login</button>
+    <div class="holo float-a">
+      <div class="holo-title" style="color:#a78bfa">📡 Live Arena</div>
+      <div id="questList">
+        <div class="feed-row"><div class="feed-dot" style="color:#00d2ff;background:#00d2ff"></div><span>ByteWizard solved Binary Search</span></div>
+        <div class="feed-row"><div class="feed-dot" style="color:#00e5a0;background:#00e5a0"></div><span>ShadowCoder reached Level 10</span></div>
+        <div class="feed-row"><div class="feed-dot" style="color:#fbbf24;background:#fbbf24"></div><span>DarkHero claimed Daily Reward</span></div>
+        <div class="feed-row"><div class="feed-dot" style="color:#a78bfa;background:#a78bfa"></div><span>NightOwl99 joined the Arena</span></div>
       </div>
     </div>
   </div>
 
-  <!-- Toast notifications -->
-  <div class="toast-container" id="toastContainer"></div>
+</div>
 
-  <script src="cursor.js"></script>
-  <script src="animations.js"></script>
-  <script src="script.js"></script>
+<div id="toastZone"></div>
 
-  <!-- Fallback inline toast in case animations.js fails to load -->
-  <script>
-    if (typeof showToast !== 'function') {
-      window.showToast = function(msg, type) {
-        const c = document.getElementById('toastContainer');
-        if (!c) return;
-        const t = document.createElement('div');
-        t.className = 'toast toast-' + (type || 'info');
-        t.textContent = msg;
-        t.style.cssText = 'padding:12px 20px;border-radius:10px;margin-bottom:8px;font-weight:600;font-size:14px;animation:slideUp .3s ease;' +
-          (type === 'error' ? 'background:#EF4444;color:#fff;' : type === 'success' ? 'background:#10B981;color:#fff;' : 'background:#7C3AED;color:#fff;');
-        c.appendChild(t);
-        setTimeout(() => t.remove(), 3000);
-      };
+<script>
+/* ══ EPIC CANVAS BACKGROUND ══ */
+const C=document.getElementById('bgCanvas'),X=C.getContext('2d');
+let W,H;
+function resize(){W=C.width=innerWidth;H=C.height=innerHeight}
+resize();addEventListener('resize',resize);
+
+/* Stars */
+const STARS=Array.from({length:280},()=>({
+  x:Math.random(),y:Math.random(),
+  r:Math.random()*1.4+.2,
+  a:Math.random(),da:Math.random()*.008+.002,
+  c:['0,210,255','139,92,246','255,255,255','251,191,36'][Math.floor(Math.random()*4)]
+}));
+
+/* Shooting stars */
+class Shooter{
+  constructor(){this.reset()}
+  reset(){
+    this.x=Math.random()*1.2-.1;this.y=Math.random()*.5;
+    this.len=Math.random()*200+80;
+    this.speed=Math.random()*16+8;
+    this.angle=Math.PI*.18+Math.random()*.12;
+    this.alpha=0;this.phase='in';
+    this.delay=Math.random()*8000+500;
+    this.timer=this.delay;
+    this.c=['0,210,255','139,92,246','255,255,255','251,191,36'][Math.floor(Math.random()*4)];
+  }
+  update(dt){
+    this.timer-=dt;if(this.timer>0)return;
+    this.x+=Math.cos(this.angle)*this.speed/W;
+    this.y+=Math.sin(this.angle)*this.speed/H;
+    if(this.phase==='in')this.alpha=Math.min(1,this.alpha+.06);
+    else this.alpha=Math.max(0,this.alpha-.035);
+    if(this.alpha>=1&&this.phase==='in')this.phase='out';
+    if(this.alpha<=0&&this.phase==='out')this.reset();
+    if(this.x>1.2||this.y>1.2)this.reset();
+  }
+  draw(){
+    if(this.timer>0)return;
+    const sx=this.x*W,sy=this.y*H;
+    const tx=sx-Math.cos(this.angle)*this.len,ty=sy-Math.sin(this.angle)*this.len;
+    const g=X.createLinearGradient(tx,ty,sx,sy);
+    g.addColorStop(0,`rgba(${this.c},0)`);
+    g.addColorStop(1,`rgba(${this.c},${this.alpha*.9})`);
+    X.beginPath();X.moveTo(tx,ty);X.lineTo(sx,sy);
+    X.strokeStyle=g;X.lineWidth=1.5+Math.random()*.5;X.stroke();
+    X.beginPath();X.arc(sx,sy,2.5,0,Math.PI*2);
+    X.fillStyle=`rgba(${this.c},${this.alpha})`;X.fill();
+  }
+}
+const SHOOTERS=Array.from({length:10},()=>new Shooter());
+
+/* Warp streaks */
+const WARPS=Array.from({length:70},()=>({
+  x:Math.random(),vy:Math.random()*.5+.1,
+  h:Math.random()*60+15,a:Math.random()*.25+.04,
+  w:Math.random()*1.2+.3,
+  c:['0,210,255','139,92,246','0,229,160'][Math.floor(Math.random()*3)],
+  py:Math.random()
+}));
+
+/* Energy beams */
+const BEAMS=Array.from({length:6},(_,i)=>({
+  x:i/5,a:Math.random()*Math.PI*2,
+  speed:(Math.random()-.5)*.2,
+  c:['0,210,255','139,92,246','0,229,160','255,107,43','251,191,36','0,210,255'][i]
+}));
+
+/* Hexagon grid flicker spots */
+const HEX_SPOTS=Array.from({length:12},()=>({
+  x:Math.random(),y:Math.random(),
+  a:Math.random()*Math.PI*2,
+  da:Math.random()*.02+.005,
+  size:Math.random()*40+20,
+  c:['0,210,255','139,92,246','0,229,160'][Math.floor(Math.random()*3)]
+}));
+
+let mx=.5,my=.5;
+addEventListener('mousemove',e=>{mx=e.clientX/W;my=e.clientY/H});
+
+let last=performance.now();
+function draw(now){
+  const dt=now-last;last=now;
+  X.clearRect(0,0,W,H);
+
+  /* deep space bg */
+  const bg=X.createRadialGradient(W*.5,H*.4,0,W*.5,H*.5,Math.max(W,H)*.9);
+  bg.addColorStop(0,'rgba(4,9,20,1)');
+  bg.addColorStop(.5,'rgba(2,5,14,1)');
+  bg.addColorStop(1,'rgba(1,2,8,1)');
+  X.fillStyle=bg;X.fillRect(0,0,W,H);
+
+  /* stars with parallax */
+  STARS.forEach(s=>{
+    s.a+=s.da;
+    const px=((s.x+(mx-.5)*.018)%1+1)%1;
+    const py=((s.y+(my-.5)*.012)%1+1)%1;
+    const br=.35+.65*Math.abs(Math.sin(s.a));
+    X.beginPath();X.arc(px*W,py*H,s.r,0,Math.PI*2);
+    X.fillStyle=`rgba(${s.c},${br*.9})`;X.fill();
+  });
+
+  /* warp streaks */
+  WARPS.forEach(w=>{
+    w.py+=w.vy/H*2;if(w.py>1)w.py=0;
+    const sx=w.x*W,sy=w.py*H;
+    const g2=X.createLinearGradient(0,sy-w.h,0,sy);
+    g2.addColorStop(0,`rgba(${w.c},0)`);
+    g2.addColorStop(.5,`rgba(${w.c},${w.a})`);
+    g2.addColorStop(1,`rgba(${w.c},0)`);
+    X.beginPath();X.moveTo(sx,sy-w.h);X.lineTo(sx,sy);
+    X.strokeStyle=g2;X.lineWidth=w.w;X.stroke();
+  });
+
+  /* subtle energy grid with mouse parallax */
+  const gSz=90,ox=(mx-.5)*20,oy=(my-.5)*15;
+  X.lineWidth=.6;
+  for(let gx=(-gSz+((now*.012)%gSz)+ox)%gSz-gSz;gx<W+gSz;gx+=gSz){
+    const ga=.02+.015*Math.abs(Math.sin(now*.0004+gx*.008));
+    X.beginPath();X.moveTo(gx,0);X.lineTo(gx,H);
+    X.strokeStyle=`rgba(0,210,255,${ga})`;X.stroke();
+  }
+  for(let gy=(-gSz+((now*.008)%gSz)+oy)%gSz-gSz;gy<H+gSz;gy+=gSz){
+    const ga=.02+.015*Math.abs(Math.sin(now*.0004+gy*.008));
+    X.beginPath();X.moveTo(0,gy);X.lineTo(W,gy);
+    X.strokeStyle=`rgba(0,210,255,${ga})`;X.stroke();
+  }
+
+  /* hex glow spots */
+  HEX_SPOTS.forEach(h=>{
+    h.a+=h.da;
+    const pulse=.04+.06*Math.abs(Math.sin(h.a));
+    const gx=X.createRadialGradient(h.x*W,h.y*H,0,h.x*W,h.y*H,h.size);
+    gx.addColorStop(0,`rgba(${h.c},${pulse})`);
+    gx.addColorStop(1,`rgba(${h.c},0)`);
+    X.fillStyle=gx;X.fillRect(h.x*W-h.size,h.y*H-h.size,h.size*2,h.size*2);
+  });
+
+  /* energy beam columns */
+  BEAMS.forEach(b=>{
+    b.a+=.003;b.x=(b.x+b.speed/W+1)%1;
+    const pulse=.025+.035*Math.abs(Math.sin(b.a));
+    const gb=X.createLinearGradient(0,0,0,H);
+    gb.addColorStop(0,`rgba(${b.c},0)`);
+    gb.addColorStop(.3,`rgba(${b.c},${pulse})`);
+    gb.addColorStop(.7,`rgba(${b.c},${pulse})`);
+    gb.addColorStop(1,`rgba(${b.c},0)`);
+    X.beginPath();X.moveTo(b.x*W,0);X.lineTo(b.x*W,H);
+    X.strokeStyle=gb;X.lineWidth=1;X.stroke();
+  });
+
+  /* shooting stars */
+  SHOOTERS.forEach(s=>{s.update(dt);s.draw()});
+
+  /* distant aurora bands */
+  const t=now*.0003;
+  for(let i=0;i<3;i++){
+    const bx=W*(0.2+i*.3+Math.sin(t+i*1.2)*.08);
+    const by=H*(0.2+i*.25+Math.cos(t*.7+i)*.1);
+    const gr=X.createRadialGradient(bx,by,0,bx,by,W*.25);
+    const cols=['0,150,255','100,0,255','0,180,140'];
+    gr.addColorStop(0,`rgba(${cols[i]},0.04)`);
+    gr.addColorStop(1,`rgba(${cols[i]},0)`);
+    X.fillStyle=gr;X.fillRect(0,0,W,H);
+  }
+
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+
+/* ══ LIVE FEED ══ */
+const EVENTS=[
+  {c:'#00d2ff',t:'ByteWizard solved Binary Search'},
+  {c:'#00e5a0',t:'ShadowCoder reached Level 10'},
+  {c:'#fbbf24',t:'DarkHero claimed Daily Reward'},
+  {c:'#a78bfa',t:'NightOwl99 joined the Arena'},
+  {c:'#ff4560',t:'DragonSlayer won a Battle'},
+  {c:'#00d2ff',t:'ZenMaster completed JS Quest'},
+  {c:'#00e5a0',t:'StarCoder earned 500 XP'},
+  {c:'#fbbf24',t:'PhoenixDev unlocked a badge'},
+  {c:'#ff6b2b',t:'RuneKnight defeated the Boss'},
+  {c:'#a78bfa',t:'VoidWalker hit 21-day streak'},
+];
+let qi=0;
+setInterval(()=>{
+  const list=document.getElementById('questList');if(!list)return;
+  const row=document.createElement('div');row.className='feed-row';
+  const e=EVENTS[qi++%EVENTS.length];
+  row.innerHTML=`<div class="feed-dot" style="color:${e.c};background:${e.c}"></div><span>${e.t}</span>`;
+  list.insertBefore(row,list.firstChild);
+  if(list.children.length>4)list.removeChild(list.lastChild);
+},2800);
+
+/* ══ UI ══ */
+function switchTab(tab){
+  document.getElementById('formLogin').classList.toggle('active',tab==='login');
+  document.getElementById('formSignup').classList.toggle('active',tab==='signup');
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='signup')));
+  clearErrors();
+}
+function showErr(id,show){
+  const el=document.getElementById(id);if(!el)return;
+  el.classList.toggle('show',show);
+  const inp=el.closest('.field')?.querySelector('input');
+  if(inp)inp.classList.toggle('err',show);
+}
+function clearErrors(){
+  document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
+  document.querySelectorAll('input').forEach(i=>i.classList.remove('err'));
+}
+function toast(title,msg,type='info'){
+  const ico={success:'✅',error:'❌',info:'⚡'};
+  const z=document.getElementById('toastZone');
+  const t=document.createElement('div');t.className='toast '+type;
+  t.innerHTML=`<div class="t-ico">${ico[type]}</div><div><div class="t-title">${title}</div><div class="t-msg">${msg}</div></div><div class="t-bar"></div>`;
+  z.appendChild(t);
+  setTimeout(()=>{t.style.animation='tOut .3s ease forwards';setTimeout(()=>t.remove(),300)},3200);
+}
+
+async function doLogin(){
+  clearErrors();
+  const email=(document.getElementById('loginEmail').value||'').trim();
+  const pass=(document.getElementById('loginPass').value||'').trim();
+  let ok=true;
+  if(!email||!email.includes('@')){showErr('loginEmailErr',true);ok=false}
+  if(!pass){showErr('loginPassErr',true);ok=false}
+  if(!ok)return;
+  const btn=document.getElementById('btnLogin');
+  btn.disabled=true;btn.textContent='CONNECTING...';
+  try{
+    const res=await fetch('http://localhost:3000/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const data=await res.json();
+    if(!res.ok){toast('Login Failed',data.error||'Invalid credentials.','error');btn.disabled=false;btn.textContent='Enter The Arena ⚔️';return}
+    localStorage.setItem('codequest_token',data.token);
+    if(data.user){
+      localStorage.setItem('codequest_user',JSON.stringify(data.user));
+      // Build progress from user object (server.js returns xp/coins/streak/level inside user)
+      const progress={xp:data.user.xp||0,coins:data.user.coins||50,streak:data.user.streak||0,level:data.user.level||1};
+      localStorage.setItem('codequest_state',JSON.stringify(progress));
     }
-  </script>
+    const heroName=data.user?.name||email.split('@')[0];
+    toast('Welcome Back!',`⚔️ Welcome back, ${heroName}! Your quest continues…`,'success');
+    setTimeout(()=>{window.location.href='dashboard.html'},1800);
+  }catch(e){
+    toast('Connection Error','Make sure the backend is running: cd backend && node server.js','error');
+    btn.disabled=false;btn.textContent='Enter The Arena ⚔️';
+  }
+}
+
+async function doSignup(){
+  clearErrors();
+  const name=(document.getElementById('signupName').value||'').trim();
+  const email=(document.getElementById('signupEmail').value||'').trim();
+  const pass=(document.getElementById('signupPass').value||'').trim();
+  let ok=true;
+  if(!name){showErr('signupNameErr',true);ok=false}
+  if(!email||!email.includes('@')){showErr('signupEmailErr',true);ok=false}
+  if(!pass||pass.length<6){showErr('signupPassErr',true);ok=false}
+  if(!ok)return;
+  const btn=document.getElementById('btnSignup');
+  btn.disabled=true;btn.textContent='FORGING HERO...';
+  try{
+    const res=await fetch('http://localhost:3000/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pass})});
+    const data=await res.json();
+    if(!res.ok){toast('Signup Failed',data.error||'Could not create account.','error');btn.disabled=false;btn.innerHTML='Forge Your Legend &nbsp;🛡️';return}
+    localStorage.setItem('codequest_token',data.token);
+    if(data.user){
+      localStorage.setItem('codequest_user',JSON.stringify(data.user));
+      const progress={xp:data.user.xp||0,coins:data.user.coins||50,streak:data.user.streak||0,level:data.user.level||1};
+      localStorage.setItem('codequest_state',JSON.stringify(progress));
+    }
+    toast('Hero Created!',`🛡️ Rise, ${name}! Your legend begins today!`,'success');
+    setTimeout(()=>{window.location.href='dashboard.html'},1800);
+  }catch(e){
+    toast('Connection Error','Make sure the backend is running: cd backend && node server.js','error');
+    btn.disabled=false;btn.innerHTML='Forge Your Legend &nbsp;🛡️';
+  }
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  if(document.getElementById('formLogin').classList.contains('active'))doLogin();
+  else doSignup();
+});
+</script>
 </body>
 </html>
